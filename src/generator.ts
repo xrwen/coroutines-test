@@ -19,33 +19,38 @@ function* generatorD() {
     yield valC * 1000 + valA;
 }
 
-type ComputeFunc = () => Iterator<number>;
 type ComputeGenerator = Iterator<number>;
+type ComputeFunc = () => ComputeGenerator;
 
-function runGenerator(func: ComputeFunc) {
+function runComputation(func: ComputeFunc) {
     let generators: Array<ComputeGenerator> = [];
-    let lastRet: number | undefined = undefined;
+    let lastRet: number = 0.0;
+    let retValid: boolean = false;
 
     generators.push(func());
 
     while (generators.length > 0) {
         let top = generators[generators.length - 1];
         
-        var result: any;
+        var result: IteratorResult<number>;
 
-        if (lastRet === undefined) {
-            result = top.next().value as any
+        if (retValid) {
+            result = top.next(lastRet);
+            retValid = false;
+            lastRet = 0.0;
         } else {
-            result = top.next(lastRet).value as any
-            lastRet = undefined;
+            result = top.next();
         }
 
-        if (typeof result === "number") {
+        if (result.done) {
             generators.pop();
-            lastRet = result as number;
+            retValid = true;
+        } else if (typeof result.value === "number") {
+            lastRet = result.value as number;
         } else {
-            var resultFunc = result as ComputeFunc;
-            generators.push(resultFunc());
+            let computeFunc = result.value as ComputeFunc;
+            let computeGenenerator = computeFunc();
+            generators.push(computeGenenerator);
         }
     }
 
@@ -53,6 +58,6 @@ function runGenerator(func: ComputeFunc) {
 }
 
 export function generatorTest() {
-    let result = runGenerator(generatorD);
+    let result = runComputation(generatorD);
     console.log(result);
 }
