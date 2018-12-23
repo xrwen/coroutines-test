@@ -23,11 +23,13 @@ class Computed {
     }
 };
 
-let A = new Computed();
-let B = new Computed(() => A.get() + 20);
-let C = new Computed(() => B.get() + 3);
-let D = new Computed(() => C.get() * 1000 + A.get());
-
-console.log("A = " + A.get() + ", D = " + D.get());
-A.set(100);
-console.log("A = " + A.get() + ", D = " + D.get());
+export function recursiveTest() {
+    let A = new Computed();
+    let B = new Computed(() => A.get() + 20);
+    let C = new Computed(() => B.get() + 3);
+    let D = new Computed(() => C.get() * 1000 + A.get());
+    
+    console.log("A = " + A.get() + ", D = " + D.get());
+    A.set(100);
+    console.log("A = " + A.get() + ", D = " + D.get());
+}
